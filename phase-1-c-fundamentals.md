@@ -54,11 +54,26 @@ Treat every topic as a conceptual foundation, not a reading list.
 
 Every topic follows the full lesson protocol defined in `system-prompt.md`.
 
+### Reality Rule
+
+This rule applies to every single topic in this roadmap. When observing any behavior in C, always classify it:
+
+| Layer | What it means |
+|---|---|
+| **C language guarantee** | The standard requires this on all conforming implementations |
+| **Compiler behavior** | GCC or Clang does this, but another compiler might not |
+| **OS behavior** | Linux does this, but macOS or Windows might differ |
+| **Hardware behavior** | x86-64 does this, but ARM or RISC-V may not |
+
+> Never assume that "it worked on my machine" means C guarantees it. This is one of the most common sources of incorrect mental models in systems programming.
+
 ---
 
 ## Milestone Projects
 
 Projects are mandatory checkpoints, not optional exercises. Complete each one before advancing past its chapter group.
+
+**The bar is: working implementation + genuine understanding — not perfection.** Don't polish a hash table for three weeks. A working, understandable implementation that you can explain fully is sufficient to advance.
 
 | After | Project | Concepts exercised |
 |---|---|---|
@@ -265,6 +280,8 @@ High addresses
 Low addresses
 ```
 
+> **Reality Rule applies here.** Stack-grows-downward and heap-grows-upward are Linux/x86-64 conventions — **not guarantees from the C standard**. C does not specify the direction of stack growth, the relationship between stack and heap, or even that a heap and stack exist as distinct regions. This diagram is a correct picture of a Linux process on x86-64. Treat it as a useful mental model, not a universal law.
+
 ### 2.5 Stack
 
 - Stack frame
@@ -328,11 +345,16 @@ Do not rush this chapter. It is your most important prerequisite for Rust.
 
 ### 3.1 Pointer Fundamentals
 
-- What a pointer contains (an address)
+- A pointer lets you refer to another object indirectly — on typical systems its representation is an address, but a pointer is not simply "an integer containing a memory address"
 - Pointer variable declaration
 - Address-of operator (`&`)
 - Dereference operator (`*`)
 - Pointer types and what the type means
+- Pointer provenance (what object a pointer is allowed to access)
+- One-past-the-end pointers (valid for arithmetic, invalid to dereference)
+- Valid vs invalid pointer values
+
+> The mental model starts simple: "a pointer holds an address." We refine it progressively. Object pointers, function pointers, null pointers, and provenance all have distinct rules in C.
 
 ### 3.2 Pointer Arithmetic
 
@@ -652,6 +674,8 @@ RAM            ~100–200 cycles
   ↓
 SSD/NVMe       ~100,000 cycles
 ```
+
+> The cycle numbers above are rough intuition, not universal truths. Actual latency varies dramatically with CPU generation, microarchitecture, cache state, and workload. The **ordering and relative magnitude** matter — not the specific numbers. The principle is: each level is an order of magnitude slower than the one above it.
 
 #### Key Concepts
 
