@@ -1,39 +1,81 @@
-# Phase 1: C Fundamentals
+# Phase 1: C Fundamentals & Systems Foundation
 
-This file is the core study map for the first phase of the systems programming roadmap. The goal is to build a strong mental model of hardware, memory, and C semantics before moving into Rust.
+This file is the core study map for the systems programming roadmap. The goal is not just to learn C — it is to build a deep mental model of hardware, memory, compilation, and OS interaction that will make Rust ownership, lifetimes, and concurrency feel inevitable rather than arbitrary.
 
 ---
 
-## How to Study This Phase
+## Structure of This Phase
 
-Treat this phase as a conceptual foundation, not just a reading list.
+This roadmap is **not a single linear prerequisite chain**. It is layered:
 
-### Success criteria
+```
+CHAPTERS 0–11 → Rust Entry Gate
+                     │
+              🦀 Rust Begins
+                     │
+CHAPTERS 12–20 → Run in parallel with Rust
+                     │
+CHAPTERS 21–27 → Advanced Systems (after Rust is comfortable)
+```
 
-By the end of this phase, you should be able to:
+Do not wait until chapter 27 before touching Rust. That is prerequisite hell.
 
-- explain how a program is represented in memory
-- reason about stack vs heap lifetime and ownership
-- explain what pointers actually hold
-- identify common C bugs and why they happen
-- understand how compilation and linking work
-- describe how the OS and hardware interact with a running process
+---
 
-### Study loop for each topic
+## 🦀 Rust Entry Gate
+
+You are ready to start Rust when you have completed chapters 0–11 with genuine understanding. The gate is not about finishing — it is about whether you can reason independently about memory, pointers, lifetime, undefined behavior, and the machine model.
+
+**Gate criteria — before starting Rust, you must be able to:**
+
+- explain how a program is laid out in memory (stack, heap, code, data)
+- explain what a pointer actually holds and what dereferencing does
+- reason about lifetime: why a value dies, when memory is freed
+- explain what undefined behavior is and why the compiler can exploit it
+- describe what happens when C is compiled, from source to executable
+- read a simplified disassembly and match it to the original C
+- identify common memory bugs and explain why they are dangerous
+
+---
+
+## How to Study Each Topic
+
+Treat every topic as a conceptual foundation, not a reading list.
+
+### Study loop
 
 1. Read the concept
 2. Write a small C example
 3. Run it and observe the behavior
 4. Debug it using compiler warnings, GDB, or sanitizers
-5. Re-explain the concept in plain language
+5. Re-explain the concept in plain language without looking at notes
 
-### Practical exercises
+### Gate 1 / Gate 2
 
-- Create a program that prints memory addresses of variables
-- Write a simple struct and show how padding/alignment works
-- Build a pointer demo that exposes dangling references
-- Create a small program with a buffer overflow and inspect it with ASan
-- Compare stack allocation vs heap allocation in a few small examples
+Every topic follows the full lesson protocol defined in `system-prompt.md`.
+
+---
+
+## Milestone Projects
+
+Projects are mandatory checkpoints, not optional exercises. Complete each one before advancing past its chapter group.
+
+| After | Project | Concepts exercised |
+|---|---|---|
+| Ch 2–3 | Dynamic array (manual `malloc`/`free`) | Heap, pointers, ownership |
+| Ch 4–6 | Hash table with chaining | Structs, linked lists, pointer-to-struct |
+| Ch 8–9 | `objdump` / `readelf` analysis of your own binary | Compilation, ELF, linking, assembly |
+| Ch 14–15 | `cat` clone using only system calls | File I/O, system calls |
+| Ch 15 | Mini shell (`fork`/`exec`/`wait`) | Processes, pipes, signals |
+| Ch 16 | Thread pool | Threads, mutex, condition variables |
+| Ch 19 | TCP echo server | Sockets, blocking I/O |
+| Ch 19 | HTTP/1.1 server | Non-blocking I/O, epoll, concurrency |
+| Ch 21 | Memory allocator (`malloc` reimplemented) | Allocator internals, alignment, free lists |
+| Rust begins | Rebuild dynamic array and hash table in Rust | Compare ownership, lifetimes, safety |
+
+---
+
+# REQUIRED BEFORE RUST — Chapters 0–11
 
 ---
 
@@ -46,8 +88,7 @@ By the end of this phase, you should be able to:
 - Instructions
 - Data
 - State
-- Input
-- Output
+- Input / output
 
 ### 0.2 What Is a Computer?
 
@@ -63,18 +104,24 @@ By the end of this phase, you should be able to:
 - Hardware
 - Firmware
 - Operating system
-- Application
 - Runtime
+- Application
 
 ### 0.4 Abstraction Layers
 
-- Hardware
-- Machine code
-- Assembly
-- C
-- Libraries
-- Operating system
-- Application
+```
+Hardware
+  ↓
+Machine code
+  ↓
+Assembly
+  ↓
+C
+  ↓
+Libraries / OS
+  ↓
+Application
+```
 
 ### 0.5 What Actually Happens When Code Runs?
 
@@ -110,13 +157,8 @@ By the end of this phase, you should be able to:
 
 ### 1.3 Types
 
-- `char`
-- `short`
-- `int`
-- `long`
-- `long long`
-- `float`
-- `double`
+- `char`, `short`, `int`, `long`, `long long`
+- `float`, `double`
 - `_Bool`
 - `void`
 
@@ -135,9 +177,7 @@ By the end of this phase, you should be able to:
 - Floating literals
 - Character constants
 - String literals
-- Hexadecimal
-- Octal
-- Binary representation
+- Hexadecimal / octal / binary
 
 ### 1.6 Variables
 
@@ -156,28 +196,24 @@ By the end of this phase, you should be able to:
 - Logical
 - Bitwise
 - Assignment
-- Increment/decrement
+- Increment / decrement
 - Conditional
 - `sizeof`
 - Cast
 
 ### 1.8 Control Flow
 
-- `if`
-- `else`
+- `if` / `else`
 - `switch`
-- `for`
-- `while`
-- `do while`
-- `break`
-- `continue`
+- `for` / `while` / `do while`
+- `break` / `continue`
 - `goto`
 
 ---
 
 ## 2. Memory — ⭐⭐⭐⭐⭐
 
-This is one of the most important branches in the entire roadmap.
+This is the most important chapter in the entire roadmap. Do not rush it.
 
 ### 2.1 Memory Fundamentals
 
@@ -187,26 +223,49 @@ This is one of the most important branches in the entire roadmap.
 - Address space
 - Memory cells
 
-### 2.2 Memory Representation
+### 2.2 Data Representation
 
 - Binary
-- Decimal
 - Hexadecimal
-- Two's complement
-- Integer representation
-- Floating-point representation
-- IEEE 754
+- Decimal
+- Two's complement (signed integers)
+- Integer overflow behavior
+- IEEE 754 (floating point)
+- Character encoding (ASCII)
 
-### 2.3 Memory Layout
+### 2.3 Endianness ⭐
 
-- Code/Text segment
-- Read-only data
-- Initialized data
-- BSS
-- Heap
-- Stack
+- Big-endian
+- Little-endian
+- Why it matters: networking, files, binary formats
+- How to detect endianness in C
+- Byte-swapping
 
-### 2.4 Stack
+> This is critical for networking and any binary protocol work.
+
+### 2.4 Memory Layout
+
+```
+High addresses
+  ┌──────────────┐
+  │    Stack     │  ← grows downward
+  ├──────────────┤
+  │     ↓        │
+  │              │
+  │     ↑        │
+  ├──────────────┤
+  │    Heap      │  ← grows upward
+  ├──────────────┤
+  │     BSS      │  (uninitialized globals)
+  ├──────────────┤
+  │    Data      │  (initialized globals)
+  ├──────────────┤
+  │    Text      │  (code / read-only)
+  └──────────────┘
+Low addresses
+```
+
+### 2.5 Stack
 
 - Stack frame
 - Stack pointer
@@ -214,104 +273,104 @@ This is one of the most important branches in the entire roadmap.
 - Local variables
 - Return address
 - Function arguments
-- Stack growth
+- Stack growth direction
 - Stack overflow
 
-### 2.5 Heap
+### 2.6 Heap
 
 - Dynamic allocation
 - Allocation metadata
-- Fragmentation
+- Fragmentation (internal / external)
 - Allocation lifetime
 - Deallocation
 
-### 2.6 C Allocation
+### 2.7 C Allocation
 
-- `malloc`
-- `calloc`
-- `realloc`
-- `free`
+- `malloc` / `calloc` / `realloc` / `free`
+- What `malloc` actually returns
+- What happens when allocation fails
+- Alignment of returned memory
 
-### 2.7 Memory Ownership
+### 2.8 Memory Ownership
 
 - Who allocated?
 - Who owns?
-- Who accesses?
-- Who modifies?
+- Who may access?
+- Who may modify?
 - Who releases?
 
-### 2.8 Memory Errors
+> This mental model is the direct foundation for Rust's ownership system.
+
+### 2.9 Memory Errors
 
 - Memory leak
 - Double free
 - Use-after-free
 - Dangling pointer
-- Buffer overflow
-- Out-of-bounds access
-- Uninitialized memory
+- Buffer overflow / out-of-bounds access
+- Uninitialized memory read
 - Invalid free
 - Heap corruption
 - Stack corruption
 
-### 2.9 Memory Debugging
+### 2.10 Memory Debugging Tools
 
 - Valgrind
-- AddressSanitizer
-- UndefinedBehaviorSanitizer
-- GDB
+- AddressSanitizer (ASan)
+- UndefinedBehaviorSanitizer (UBSan)
+- GDB memory inspection
 
 ---
 
 ## 3. Pointers — ⭐⭐⭐⭐⭐
 
-Do not rush this chapter.
+Do not rush this chapter. It is your most important prerequisite for Rust.
 
 ### 3.1 Pointer Fundamentals
 
-- Address
-- Pointer variable
-- Dereferencing
-- Address-of operator
-- Pointer types
+- What a pointer contains (an address)
+- Pointer variable declaration
+- Address-of operator (`&`)
+- Dereference operator (`*`)
+- Pointer types and what the type means
 
 ### 3.2 Pointer Arithmetic
 
-- Increment
-- Decrement
-- Addition
-- Subtraction
+- Increment / decrement
+- Addition / subtraction
 - Pointer difference
+- How type size affects arithmetic
 
 ### 3.3 Pointer Relationships
 
 - Pointer → value
-- Pointer → pointer
+- Pointer → pointer (`**`)
 - Pointer → array
 - Pointer → struct
 - Pointer → function
 
-### 3.4 Pointer Types
+### 3.4 Pointer Type Variants
 
 - `void *`
 - `char *`
-- `const T *`
-- `T *const`
-- `const T *const`
+- `const T *` (pointer to const)
+- `T *const` (const pointer)
+- `const T *const` (both)
 
 ### 3.5 Pointer Safety
 
 - Null pointer
 - Dangling pointer
-- Wild pointer
-- Invalid pointer
-- Lifetime
+- Wild pointer (uninitialized)
+- Invalid pointer (freed or out of bounds)
+- Pointer lifetime and the object it points to
 
 ### 3.6 Function Pointers
 
 - Function address
-- Callback
-- Dispatch table
-- Function pointer arrays
+- Callback pattern
+- Dispatch tables
+- Arrays of function pointers
 
 ### 3.7 Advanced Pointers
 
@@ -329,32 +388,31 @@ Do not rush this chapter.
 
 - Contiguous memory
 - Indexing
-- Array size
+- Array size (`sizeof`)
 - Array lifetime
-- Multidimensional arrays
+- Multidimensional arrays and layout
 
 ### 4.2 Array ↔ Pointer Relationship
 
-- Array decay
-- Pointer arithmetic
+- Array decay to pointer
+- Pointer arithmetic on arrays
 - Passing arrays to functions
+- Why arrays are not pointers (and where they behave like one)
 
 ### 4.3 Strings
 
-- Null terminator
-- String literals
-- Character arrays
-- String length
-- String copying
-- String comparison
+- Null terminator convention
+- String literals (read-only)
+- Character arrays (writable)
+- `strlen` / `strcpy` / `strcmp` / `strcat`
 
 ### 4.4 C String Problems
 
 - Buffer overflow
-- Missing terminator
-- String lifetime
-- Immutable string literals
-- Unsafe copying
+- Missing null terminator
+- String lifetime (stack vs heap)
+- Modifying a string literal (UB)
+- Unsafe copying with `strcpy`
 
 ---
 
@@ -362,39 +420,39 @@ Do not rush this chapter.
 
 ### 5.1 Functions
 
-- Declaration
-- Definition
+- Declaration vs definition
 - Prototype
-- Parameters
-- Return value
+- Parameters and return value
+- `void` functions
 
 ### 5.2 Function Call Mechanics
 
 - Call stack
-- Stack frame
-- Arguments
-- Return address
-- Return value
+- Stack frame creation
+- Arguments placed on stack / in registers
+- Return address pushed
+- Return value convention
 
 ### 5.3 Parameter Passing
 
-- Pass-by-value
-- Passing pointers
-- Simulating pass-by-reference
+- Pass-by-value (always in C)
+- Passing pointers to simulate pass-by-reference
+- What actually happens to large structs
 
 ### 5.4 Recursion
 
-- Recursive call
-- Stack growth
-- Base case
-- Stack overflow
+- Recursive call mechanics
+- Stack growth per frame
+- Base case requirement
+- Stack overflow from infinite recursion
 
 ### 5.5 Calling Conventions
 
-- Registers
-- Stack arguments
-- Return registers
-- ABI
+- Which arguments go in which registers
+- Stack vs register arguments
+- Return register
+- Caller-saved vs callee-saved registers
+- ABI (Application Binary Interface)
 
 ---
 
@@ -402,40 +460,40 @@ Do not rush this chapter.
 
 ### 6.1 Structures
 
-- Fields
-- Memory layout
-- Padding
-- Alignment
+- Fields and their order
+- Memory layout (sequential)
+- Padding (alignment holes)
+- Alignment rules
 - Nested structs
 
 ### 6.2 Struct Pointers
 
-- `->`
-- Pointer-to-struct
-- Dynamic structs
+- `->` operator
+- Pointer-to-struct usage
+- Dynamic structs on the heap
 
 ### 6.3 Structure Passing
 
-- Pass by value
-- Pass by pointer
+- Pass by value (full copy)
+- Pass by pointer (address only)
 
 ### 6.4 Unions
 
-- Shared storage
+- Shared storage for all members
 - Type punning
-- Representation
+- Binary representation access
 
 ### 6.5 Enums
 
 - Enumeration constants
-- Representation
+- Integer representation
 - State modeling
 
 ### 6.6 Bitfields
 
 - Bit-level storage
-- Packing
-- Hardware-oriented structures
+- Packing for hardware-oriented structures
+- Portability limitations
 
 ---
 
@@ -443,10 +501,9 @@ Do not rush this chapter.
 
 ### 7.1 Type Conversion
 
-- Implicit conversion
-- Explicit conversion
-- Integer promotion
-- Usual arithmetic conversions
+- Implicit conversion (integer promotion, usual arithmetic conversions)
+- Explicit conversion (cast)
+- What information is lost
 
 ### 7.2 Qualifiers
 
@@ -460,11 +517,7 @@ Do not rush this chapter.
 
 ### 7.4 Composite Types
 
-- Arrays
-- Pointers
-- Functions
-- Structs
-- Unions
+- Arrays, pointers, functions, structs, unions
 
 ### 7.5 Type Compatibility
 
@@ -476,40 +529,33 @@ Do not rush this chapter.
 
 ## 8. Compilation — ⭐⭐⭐⭐⭐
 
-Do not treat `gcc file.c` as magic. Understand what actually happens.
+Do not treat `gcc file.c` as magic. Understand every stage.
 
 ### 8.1 Source → Executable
 
-```text
+```
 C Source
   ↓
-Preprocessor
+Preprocessor   → .i file
   ↓
-Compiler
+Compiler       → .s file (assembly)
   ↓
-Assembly
+Assembler      → .o file (object)
   ↓
-Assembler
-  ↓
-Object File
-  ↓
-Linker
-  ↓
-Executable
+Linker         → executable (ELF)
 ```
 
 ### 8.2 Preprocessor
 
-- `#include`
-- `#define`
-- Macros
-- Conditional compilation
-- Header guards
+- `#include` (textual inclusion)
+- `#define` macros
+- Conditional compilation (`#ifdef`, `#ifndef`)
+- Header guards / `#pragma once`
 
-### 8.3 Compiler
+### 8.3 Compiler Stages
 
-- Lexing
-- Parsing
+- Lexing (tokens)
+- Parsing (AST)
 - Semantic analysis
 - Optimization
 - Code generation
@@ -520,115 +566,165 @@ Executable
 - Instructions
 - Labels
 - Stack operations
-- Calling conventions
+- Calling conventions in assembly
 
-### 8.5 Assembler
+### 8.5 Object Files
 
-- Assembly → object code
-
-### 8.6 Object Files
-
-- Sections
-- Symbols
+- Sections (`.text`, `.data`, `.bss`, `.rodata`)
+- Symbols (defined, undefined)
 - Relocations
 
-### 8.7 Linker
+### 8.6 Linker
 
 - Symbol resolution
 - Relocation
-- Static linking
-- Dynamic linking
+- Static linking (`.a` archives)
+- Dynamic linking (`.so` shared objects)
 
-### 8.8 Executable Formats
+### 8.7 Executable Format (ELF)
 
-- ELF
-- PE
-- Mach-O
+- ELF header
+- Sections vs segments
+- Program headers
+- Entry point
+- `readelf` and `objdump` for inspection
+
+### 8.8 ABI & API ⭐
+
+- API: source-level interface
+- ABI: binary-level interface (register usage, data layout, calling convention, symbol names)
+- Why ABI stability matters
+- How C ABI enables interoperability with Rust, Python, and other languages
+
+> ABI is the bridge between languages. It is what makes `extern "C"` in Rust possible.
 
 ---
 
 ## 9. Assembly & Machine-Level Understanding
 
-You do not need to become an assembly expert, but you must understand the machine model.
+You do not need to become an assembly programmer. You need to understand the machine model deeply enough to read a disassembly and reason about what the CPU is doing.
 
 ### 9.1 CPU
 
-- Registers
+- Registers (general-purpose, stack pointer, instruction pointer, flags)
 - ALU
 - Control unit
-- Instruction pointer
+- Instruction fetch-decode-execute cycle
 
-### 9.2 Instructions
+### 9.2 Core Instructions
 
-- Load
-- Store
-- Move
-- Add
-- Subtract
-- Compare
-- Jump
-- Call
-- Return
+- `mov` / `lea`
+- `add` / `sub` / `imul` / `idiv`
+- `cmp` / `test`
+- `jmp` / `je` / `jne` / `jl` / `jg`
+- `call` / `ret`
+- `push` / `pop`
 
-### 9.3 Registers
-
-- General purpose
-- Stack pointer
-- Instruction pointer
-- Flags
-
-### 9.4 Machine Code
+### 9.3 Machine Code
 
 - Opcodes
 - Operands
-- Instruction encoding
+- Instruction encoding basics
 
-### 9.5 Assembly ↔ C
+### 9.4 Assembly ↔ C Mapping
 
-- Variable → register/memory
-- Function → call
-- Loop → branch
-- Pointer → address calculation
+- Variable → register or memory location
+- Function → `call` + stack frame
+- Loop → compare + conditional jump
+- Pointer dereference → load from address
+
+### 9.5 Computer Architecture ⭐⭐⭐⭐⭐
+
+Understanding why code is fast or slow requires knowing the hardware underneath C.
+
+#### Memory Hierarchy
+
+```
+Registers      ~1 cycle
+  ↓
+L1 Cache       ~4 cycles    (64 KB typical)
+  ↓
+L2 Cache       ~12 cycles   (512 KB typical)
+  ↓
+L3 Cache       ~40 cycles   (shared, 8–32 MB)
+  ↓
+RAM            ~100–200 cycles
+  ↓
+SSD/NVMe       ~100,000 cycles
+```
+
+#### Key Concepts
+
+- Cache line (64 bytes typically)
+- Spatial locality and temporal locality
+- Cache miss
+- False sharing (threads on same cache line)
+- Branch prediction
+- Instruction pipeline
+- Out-of-order execution
+- SIMD (single instruction, multiple data)
+- Memory latency vs memory bandwidth
+
+> You will encounter cache effects constantly when writing systems software in C or Rust. This is not optional knowledge.
 
 ---
 
 ## 10. Undefined Behavior — ⭐⭐⭐⭐⭐
 
-This deserves its own major branch.
+This deserves its own chapter. UB is the single most dangerous concept in C.
 
 ### 10.1 What Is Undefined Behavior?
 
-### 10.2 Why C Has UB
+### 10.2 Why C Has UB (and Why That Is a Design Choice)
 
-### 10.3 Examples
+### 10.3 The Most Important UB Examples
 
 - Out-of-bounds access
 - Use-after-free
-- Signed overflow
-- Invalid shift
+- Signed integer overflow
 - Invalid pointer dereference
 - Uninitialized reads
-- Data races
+- Strict aliasing violation
+- Data race
+- Invalid shift
 
-### 10.4 Compiler Assumptions
+### 10.4 Compiler Assumptions Based on UB
 
-### 10.5 Optimization vs UB
+### 10.5 Optimization and UB Interaction
 
-### 10.6 Why "It Worked on My Machine" Is Not Proof
+### 10.6 Why "It Works on My Machine" Is Not Proof
+
+### 10.7 Detecting UB
+
+- UBSan
+- Compiler warnings at `-Wall -Wextra -Wpedantic`
+- Static analysis tools (`clang-tidy`, `cppcheck`)
 
 ---
 
 ## 11. Storage Duration & Lifetime
 
-- Automatic
-- Static
-- Thread-local
-- Allocated
-- Object lifetime
-- Scope vs lifetime
-- Ownership vs lifetime
+- Automatic storage (stack)
+- Static storage (globals, `static` locals)
+- Thread-local storage
+- Allocated storage (heap)
+- Object lifetime vs scope
+- Scope ≠ lifetime
+- Ownership as a mental model (who is responsible for releasing?)
 
-> This branch will later make Rust ownership and lifetimes much easier.
+> This chapter is the direct conceptual bridge to Rust. If you understand C lifetime well, Rust lifetimes will feel like enforced documentation rather than a new concept.
+
+---
+
+# 🦀 RUST ENTRY GATE
+
+Complete chapters 0–11 before proceeding. See gate criteria at the top of this file.
+
+---
+
+# PARALLEL WITH RUST — Chapters 12–20
+
+Study these alongside Rust. Each C topic has a direct Rust parallel.
 
 ---
 
@@ -636,47 +732,37 @@ This deserves its own major branch.
 
 - Local scope
 - Global scope
-- Internal linkage
-- External linkage
-- `static`
-- `extern`
-- Symbols
+- Internal linkage (`static`)
+- External linkage (`extern`)
 - Symbol visibility
+- Name mangling (C vs C++)
 
 ---
 
 ## 13. C Modules & Build System
 
-- Header files
-- Source files
+- Header files and source files
 - Translation units
-- Include guards
+- Include guards / `#pragma once`
 - Separate compilation
-- Static libraries
-- Shared libraries
-- ABI
-- API vs ABI
-- Make
-- CMake
+- Static libraries (`.a`)
+- Shared libraries (`.so`)
+- `make` / `CMake`
 
-> This becomes useful later when understanding Rust crates, modules, and Cargo.
+> Understand this alongside Rust's crate and module system — the concepts map directly.
 
 ---
 
-## 14. File I/O & Operating-System Interface
+## 14. File I/O & OS Interface
 
-- Files
-- File descriptors
-- `open`
-- `read`
-- `write`
-- `close`
-- Standard streams: `stdin`, `stdout`, `stderr`
-- Buffering
+- Files and file descriptors
+- `open` / `read` / `write` / `close`
+- Standard streams (`stdin`, `stdout`, `stderr`)
+- Buffering (fully buffered, line buffered, unbuffered)
 - System calls
-- C library vs kernel
+- C library vs kernel boundary
 
-> This distinction is extremely important.
+> The distinction between libc and the kernel is critical. The C standard library wraps system calls — it is not the kernel.
 
 ---
 
@@ -684,197 +770,225 @@ This deserves its own major branch.
 
 ### 15.1 Program vs Process
 
-### 15.2 Process Memory
+### 15.2 Process Address Space
 
-- Code
-- Data
+- Code / text
+- Data (initialized / uninitialized)
 - Heap
 - Stack
+- Memory-mapped regions
 
 ### 15.3 Process Creation
 
-- `fork`
-- `exec`
+- `fork` (copy the process)
+- `exec` (replace the image)
+- `fork` + `exec` pattern
 
 ### 15.4 Process Termination
 
-### 15.5 Exit Status
+- Exit status
+- `wait` / `waitpid`
+- Zombie processes
+- Orphan processes
 
-### 15.6 Parent/Child Processes
+### 15.5 Process IDs
 
-### 15.7 Process IDs
+### 15.6 Environment Variables
 
-### 15.8 Environment Variables
+### 15.7 Pipes
 
-### 15.9 Pipes
+- Anonymous pipes (`pipe`)
+- I/O redirection
 
-### 15.10 Signals
+### 15.8 Signals
+
+- Signal delivery
+- Signal handlers
+- Common signals (`SIGINT`, `SIGTERM`, `SIGSEGV`, `SIGCHLD`)
 
 ---
 
 ## 16. Threads & Concurrency — ⭐⭐⭐⭐⭐
 
-- Process vs thread
-- Thread stack
-- Shared memory
-- Race conditions
-- Data races
-- Mutex
+- Process vs thread (shared address space)
+- Thread stack vs process stack
+- Shared memory and race conditions
+- Data races (C UB) vs race conditions (logic bug)
+- Mutex (`pthread_mutex_t`)
 - Semaphore
 - Condition variables
-- Atomic operations
+- Atomic operations (`_Atomic`, `stdatomic.h`)
 - Memory ordering
 - Deadlocks
 - Starvation
-- Lock-free programming
+- Lock-free programming basics
 
-> This branch is extremely valuable before Rust concurrency.
+> Study this directly before or alongside Rust concurrency (`Arc`, `Mutex`, `Send`, `Sync`, channels, async).
 
 ---
 
 ## 17. Virtual Memory — ⭐⭐⭐⭐⭐
 
-- Physical memory
-- Virtual memory
-- Virtual addresses
-- Physical addresses
-- Page
-- Page table
-- MMU
-- TLB
+- Physical memory vs virtual memory
+- Virtual addresses vs physical addresses
+- Pages and page size
+- Page tables
+- MMU (Memory Management Unit)
+- TLB (Translation Lookaside Buffer)
 - Page fault
-- Memory mapping
-- `mmap`
+- Memory-mapped files (`mmap`)
 - Copy-on-write
+- ASLR (Address Space Layout Randomization)
 
-> This will completely change how you think about pointers.
+> Virtual memory completely changes how you think about pointers. Every address you see in a C program is virtual.
 
 ---
 
 ## 18. System Calls
 
-- User mode
-- Kernel mode
-- Privilege levels
-- System call interface
+- User mode vs kernel mode
+- Privilege levels (rings)
+- System call interface (`syscall` instruction)
 - System call boundary
-- Arguments
-- Return values
+- Arguments and return values
 - `errno`
-- C library vs system call
+- C library wrappers vs raw system calls
+- `strace` for observation
 
 ---
 
 ## 19. Networking — ⭐⭐⭐⭐⭐
 
+Networking + Rust is one of the most powerful combinations for systems engineering.
+
 ### 19.1 Network Fundamentals
 
-- IP
-- MAC
+- IP address
+- MAC address
 - Port
-- Packet
-- Frame
+- Packet / frame
+- Encapsulation
 
-### 19.2 TCP/IP
+### 19.2 Ethernet & IP
 
-- TCP
-- UDP
-- IP
-- DNS
-- HTTP
+- Ethernet frame
+- IP packet structure
+- ARP
+- ICMP (ping)
 
-### 19.3 Sockets
+### 19.3 Transport Layer
 
-- Socket
-- Bind
-- Listen
-- Accept
-- Connect
-- Send
-- Receive
+- TCP: connection-oriented, reliable, ordered
+- UDP: connectionless, unreliable, fast
+- TCP handshake (SYN / SYN-ACK / ACK)
+- TCP teardown
+- Flow control / congestion control
 
-### 19.4 Server Architecture
+### 19.4 Application Layer
 
-- Single-threaded
-- Multi-process
-- Multi-threaded
-- Event-driven
+- DNS resolution
+- HTTP/1.1 request/response
+- TLS (conceptual overview)
 
-### 19.5 Network Concurrency
+### 19.5 Sockets
+
+- Socket file descriptor
+- `socket` / `bind` / `listen` / `accept` / `connect`
+- `send` / `recv`
+- Address structures (`sockaddr_in`, `sockaddr_in6`)
+
+### 19.6 I/O Models
+
+- Blocking I/O
+- Non-blocking I/O
+- `select` / `poll`
+- `epoll` (Linux)
+- Event-driven architecture
+
+### 19.7 Server Architecture Patterns
+
+- Single-threaded (blocking)
+- Multi-process (one process per connection)
+- Multi-threaded (one thread per connection)
+- Event-driven (single thread, `epoll`)
+- Thread pool + event loop
+
+### 19.8 Network Concurrency
+
+- The C10K problem
+- Why threads-per-connection does not scale
+- `epoll` + non-blocking sockets
+- How async Rust (Tokio) maps to this model
 
 ---
 
 ## 20. Data Structures in C
 
-Not just for DSA. Use them to understand memory, layout, and pointers.
+Use these not just for algorithms, but to understand memory layout, pointer manipulation, and ownership patterns.
 
-- Array
-- Dynamic array
-- Linked list
-- Doubly linked list
-- Stack
-- Queue
-- Hash table
-- Tree
+- Dynamic array (manual grow/shrink)
+- Linked list (singly / doubly)
+- Stack and queue
+- Hash table (chaining / open addressing)
 - Binary search tree
-- Heap
-- Graph
+- Heap (priority queue)
 
-> For every structure ask: where exactly is every byte stored?
+> For every structure: where exactly is every byte stored? Who owns it? Who frees it?
 
 ---
 
-## 21. Memory Allocator
+# ADVANCED — Chapters 21–27
 
-This is an elite-level foundation topic.
+Study these after Rust fundamentals are established. They deepen your systems understanding but are not prerequisites for starting Rust.
+
+---
+
+## 21. Memory Allocator ⭐⭐⭐⭐⭐
+
+Build your own `malloc`. This is elite-level foundation work.
 
 - Why allocators exist
-- Allocation strategies
+- Allocation strategies (first fit, best fit, segregated)
 - Free lists
-- Block metadata
-- Splitting
-- Coalescing
-- Fragmentation
-- Alignment
-- `malloc` internals
-- Build your own allocator
-
-> If you understand this deeply, you will understand a huge amount of systems programming.
+- Block metadata and headers
+- Splitting and coalescing
+- Fragmentation (internal / external)
+- Alignment requirements
+- `sbrk` / `mmap` for acquiring memory from the OS
+- `malloc` internals (jemalloc, tcmalloc, mimalloc)
+- Implement your own allocator
 
 ---
 
 ## 22. Debugging & Observability
 
-- GDB
-- Breakpoints
-- Watchpoints
-- Stack frames
-- Registers
-- Memory inspection
-- Core dumps
-- Valgrind
-- Sanitizers
-- `strace`
-- `ltrace`
-- `objdump`
-- `readelf`
-- `nm`
-- `perf`
+- GDB: breakpoints, watchpoints, stack frames, register inspection, memory inspection, core dumps
+- Valgrind: memcheck, callgrind, cachegrind
+- Sanitizers: ASan, UBSan, TSan
+- `strace` (system call tracing)
+- `ltrace` (library call tracing)
+- `objdump` / `readelf` / `nm`
+- `perf` (performance profiling)
 
 ---
 
 ## 23. Security Fundamentals
 
-- Memory safety
-- Buffer overflow
-- Stack smashing
-- Heap exploitation
-- Use-after-free
-- Integer overflow
-- Format string vulnerability
-- Command injection
-- ASLR
-- DEP/NX
+Integrate security knowledge naturally when learning each topic:
+
+| When learning | Introduce |
+|---|---|
+| Arrays / strings | Buffer overflow, unsafe copying |
+| Stack | Stack smashing, stack canaries |
+| Pointers / heap | Use-after-free, heap exploitation |
+| Integers | Integer overflow, signedness bugs |
+| Format strings | Format string vulnerability |
+| System calls | Command injection, privilege escalation |
+
+Then consolidate:
+
+- ASLR (Address Space Layout Randomization)
+- DEP / NX (Data Execution Prevention / No-Execute)
 - Stack canaries
 - Control-flow integrity
 
@@ -882,60 +996,90 @@ This is an elite-level foundation topic.
 
 ## 24. C Standard Library Internals
 
-- `stdio`
-- `stdlib`
-- `string`
-- `stdint`
-- `stdbool`
-- `stddef`
-- `errno`
-- `time`
-- `math`
+You need to understand the distinction between library behavior and OS/kernel behavior — not to reverse-engineer libc.
 
-> Understand the difference between library behavior and OS/kernel behavior.
+- `stdio.h`: buffered I/O over file descriptors
+- `stdlib.h`: `malloc`, `free`, `exit`, `getenv`
+- `string.h`: memory and string utilities
+- `stdint.h` / `stddef.h` / `stdbool.h`: portable types
+- `errno.h`: error reporting
+- `time.h`: POSIX time
 
 ---
 
-## 25. Hardware Interaction
+## 25. ABI & FFI — ⭐⭐⭐⭐⭐
+
+This is a major concept for real-world systems work.
+
+### 25.1 ABI Deep Dive
+
+- Calling convention (register assignments, stack layout, alignment)
+- Data layout (struct padding, endianness, pointer size)
+- Symbol naming (C vs C++ name mangling)
+- Dynamic linking and the PLT/GOT
+- ABI stability and versioning
+
+### 25.2 FFI (Foreign Function Interface)
+
+- How C exposes functions to other languages
+- `extern "C"` in C++ and Rust
+- Linking against C libraries from Rust
+- Linking against C++ from Rust (via `extern "C"` wrapper)
+- `bindgen` (auto-generate Rust bindings from C headers)
+
+### 25.3 Real-World Interop
+
+```
+Rust binary
+  │
+  ├── calls → libsqlite3 (C)
+  ├── calls → OpenSSL (C)
+  ├── calls → OS API (C ABI)
+  └── wraps → C++ library (via extern "C" shim)
+```
+
+This is what production Rust systems look like.
+
+---
+
+## 26. Hardware Interaction
 
 - Memory-mapped I/O
-- Registers
+- Registers (hardware, not CPU)
 - Interrupts
-- DMA
+- DMA (Direct Memory Access)
 - Device drivers
-- Volatile memory
+- `volatile` memory
 - Embedded C
-- Microcontrollers
+- Microcontrollers (bare-metal programming)
 
 ---
 
-## 26. Advanced C Concepts
+## 27. Advanced C Concepts
+
+These are not required before Rust, but complete your deep C mastery.
 
 - Function-like macros
-- Variadic functions
-- `va_list`
-- `setjmp`
-- `longjmp`
+- Variadic functions and `va_list`
+- `setjmp` / `longjmp`
 - Flexible array members
 - Compound literals
 - Designated initializers
-- `_Generic`
-- `_Atomic`
-- `_Alignof`
-- `_Alignas`
-
-> These are not all essential for the first Rust transition, but they are highly useful for deep C mastery.
+- `_Generic` (type-generic macros)
+- `_Atomic` (C11 atomics)
+- `_Alignof` / `_Alignas`
+- `__attribute__` extensions (GCC/Clang)
 
 ---
 
 ## Final Takeaway
 
-The practical objective of this phase is not just to memorize C syntax, but to understand:
+The practical objective of this entire phase is not C mastery for its own sake. It is:
 
-- how memory is laid out
-- how pointers relate to addresses
-- how the compiler transforms code
-- why undefined behavior is dangerous
-- how the OS and hardware interact with user programs
+- understanding how memory is laid out and why
+- knowing exactly what a pointer holds and how it can go wrong
+- understanding how the compiler transforms your intentions into machine instructions
+- knowing why undefined behavior is not just "unknown" but actively exploited by compilers
+- seeing how the OS and hardware interact with a running process
 
-Once these ideas are clear, the move into Rust ownership, borrowing, lifetimes, and concurrency becomes significantly easier.
+When these ideas are clear, Rust ownership, borrowing, lifetimes, and concurrency model will feel like **the logical solution to problems you already understand**, rather than arbitrary restrictions imposed by the language.
